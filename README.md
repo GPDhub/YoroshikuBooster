@@ -1,6 +1,7 @@
 # 相談相手 - Consultation App
 
 何でも相談できる優しい相談相手アプリです。400パターンの豊富な回答で、あなたの悩みに寄り添います。
+https://gpdhub.github.io/YoroshikuBooster/
 
 ## 🌟 特徴
 
