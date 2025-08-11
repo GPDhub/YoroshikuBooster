@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>相談相手</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Hiragino Kaku Gothic Pro', 'ヒラギノ角ゴ Pro W3', 'メイリオ', sans-serif;
+            background: linear-gradient(135deg, #a8e6cf 0%, #88d8c0 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            width: 100%;
+        }
+
+        .main-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .header {
+            margin-bottom: 30px;
+        }
+
+        .title {
+            font-size: 2.2rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            color: #7f8c8d;
+            line-height: 1.5;
+        }
+
+        .input-section {
+            margin-bottom: 30px;
+        }
+
+        .label {
+            font-weight: bold;
+            margin-bottom: 15px;
+            display: block;
+            color: #34495e;
+            font-size: 1.1rem;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 20px;
+            border: 2px solid #e1e5e9;
+            border-radius: 15px;
+            font-size: 16px;
+            resize: vertical;
+            min-height: 150px;
+            font-family: inherit;
+            line-height: 1.5;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: #a8e6cf;
+            box-shadow: 0 0 0 3px rgba(168, 230, 207, 0.1);
+        }
+
+        .input-field::placeholder {
+            color: #bdc3c7;
+        }
+
+        .response-button {
+            background: linear-gradient(135deg, #a8e6cf, #88d8c0);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 25px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-bottom: 30px;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(168, 230, 207, 0.3);
+        }
+
+        .response-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(168, 230, 207, 0.4);
+        }
+
+        .response-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .result-section {
+            margin-top: 20px;
+        }
+
+        .result-box {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            padding: 25px;
+            border-radius: 15px;
+            font-size: 18px;
+            line-height: 1.7;
+            color: #2c3e50;
+            text-align: left;
+            min-height: 80px;
+            border-left: 4px solid #a8e6cf;
+            display: none;
+        }
+
+        .result-box.show {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 768px) {
+            .title {
+                font-size: 1.8rem;
+            }
+            
+            .main-card {
+                padding: 25px;
+            }
+
+            .response-button {
+                padding: 12px 30px;
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="main-card">
+            <header class="header">
+                <h1 class="title">相談相手</h1>
+                <p class="subtitle">何でも話してください。<br>優しく聞いて、そっと背中を押します。</p>
+            </header>
+
+            <div class="input-section">
+                <label class="label">今、どんなことで悩んでいますか？</label>
+                <textarea id="inputText" class="input-field" placeholder="最近疲れてて...&#10;仕事がうまくいかなくて...&#10;人間関係で悩んでいて...&#10;&#10;どんな小さなことでも大丈夫です"></textarea>
+            </div>
+
+            <button id="responseBtn" class="response-button">
+                優しく答えてもらう
+            </button>
+
+            <div class="result-section">
+                <div id="resultBox" class="result-box"></div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // 外部ファイルから大量のパターンを読み込み
+        import { RELATIONSHIP_RESPONSES, WORK_RESPONSES } from './responses.js';
+        import { MISTAKE_RESPONSES, GENERAL_RESPONSES } from './responses2.js';
+
+        const ADVICE_RESPONSES = {
+            relationship: RELATIONSHIP_RESPONSES,
+            work: WORK_RESPONSES,
+            mistake: MISTAKE_RESPONSES,
+            general: GENERAL_RESPONSES
+        };
+
+        function detectCategory(input) {
+            const text = input.toLowerCase();
+            
+            if (text.includes('喧嘩') || text.includes('仲直り') || text.includes('友達') || text.includes('恋人') || text.includes('家族') || text.includes('人間関係')) {
+                return 'relationship';
+            }
+            if (text.includes('仕事') || text.includes('会社') || text.includes('上司') || text.includes('同僚') || text.includes('転職')) {
+                return 'work';
+            }
+            if (text.includes('失敗') || text.includes('ミス') || text.includes('間違') || text.includes('しまった') || text.includes('やらかし')) {
+                return 'mistake';
+            }
+            return 'general';
+        }
+
+        function generateResponse() {
+            const input = document.getElementById('inputText').value.trim();
+            const resultBox = document.getElementById('resultBox');
+            const responseBtn = document.getElementById('responseBtn');
+
+            if (!input) {
+                alert('まずは何か話してみませんか？どんな小さなことでも大丈夫です。');
+                return;
+            }
+
+            // ボタンを無効化
+            responseBtn.disabled = true;
+            responseBtn.textContent = '考え中...';
+
+            // 少し待ってから回答を表示（人間らしい応答時間）
+            setTimeout(() => {
+                const category = detectCategory(input);
+                const templates = ADVICE_RESPONSES[category];
+                const template = templates[Math.floor(Math.random() * templates.length)];
+                
+                resultBox.textContent = template;
+                resultBox.classList.remove('show');
+                resultBox.classList.add('show');
+
+                // ボタンを元に戻す
+                responseBtn.disabled = false;
+                responseBtn.textContent = '優しく答えてもらう';
+            }, 1500);
+        }
+
+        // イベントリスナーを設定
+        document.addEventListener('DOMContentLoaded', function() {
+            const responseBtn = document.getElementById('responseBtn');
+            
+            responseBtn.addEventListener('click', generateResponse);
+        });
+    </script>
+</body>
+</html>
